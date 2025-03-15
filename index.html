@@ -57,21 +57,37 @@
     #badges {
       color: #800080;
     }
-    #challenge-select {
-      margin-bottom: 20px;
+    #operation-select, #number-select, #level-select {
+      margin-bottom: 10px;
       font-size: 18px;
       padding: 5px;
+      margin-right: 10px;
     }
   </style>
 </head>
 <body>
   <h1>Math Grid Challenge</h1>
-  <select id="challenge-select">
-    <option value="multiply-2">Multiply by 2</option>
-    <option value="add-3">Add 3</option>
-    <option value="subtract-4">Subtract 4</option>
+  <select id="operation-select">
+    <option value="add">Add</option>
+    <option value="subtract">Subtract</option>
   </select>
-  <div id="challenge-info">Challenge: Multiply by 2</div>
+  <select id="number-select">
+    <option value="1">1</option>
+    <option value="2">2</option>
+    <option value="3">3</option>
+    <option value="4">4</option>
+    <option value="5">5</option>
+    <option value="6">6</option>
+    <option value="7">7</option>
+    <option value="8">8</option>
+    <option value="9">9</option>
+    <option value="10">10</option>
+  </select>
+  <select id="level-select">
+    <option value="basic">Basic</option>
+    <option value="advanced">Advanced</option>
+  </select>
+  <div id="challenge-info">Challenge: Add by 2</div>
   <div id="grid"></div>
   <div id="score">Score: 0</div>
   <div id="badges">Badges: None</div>
@@ -88,34 +104,38 @@
 
     // Game state
     let currentNumber = 2; // Starting number
-    let operation = 'multiply'; // Current operation
-    let value = 2; // Operation value (e.g., multiply by 2, add 3)
+    let operation = 'add'; // Current operation
+    let value = 2; // Operation value (1-10)
+    let level = 'basic'; // Current level
     let score = 0;
     let badges = [];
 
-    // Challenge selection
-    const challengeSelect = document.getElementById('challenge-select');
-    challengeSelect.addEventListener('change', startChallenge);
+    // Dropdowns
+    const operationSelect = document.getElementById('operation-select');
+    const numberSelect = document.getElementById('number-select');
+    const levelSelect = document.getElementById('level-select');
+    operationSelect.addEventListener('change', startChallenge);
+    numberSelect.addEventListener('change', startChallenge);
+    levelSelect.addEventListener('change', startChallenge);
 
     function startChallenge() {
-      const challenge = challengeSelect.value;
+      operation = operationSelect.value;
+      value = parseInt(numberSelect.value);
+      level = levelSelect.value;
       resetGame();
-      if (challenge === 'multiply-2') {
-        operation = 'multiply';
-        value = 2;
-        currentNumber = 2;
-        document.getElementById('challenge-info').textContent = 'Challenge: Multiply by 2';
-      } else if (challenge === 'add-3') {
-        operation = 'add';
-        value = 3;
-        currentNumber = Math.floor(Math.random() * 90) + 1; // Random start 1-90
-        document.getElementById('challenge-info').textContent = `Challenge: Add 3 (Start at ${currentNumber})`;
-      } else if (challenge === 'subtract-4') {
-        operation = 'subtract';
-        value = 4;
-        currentNumber = Math.floor(Math.random() * 50) + 51; // Random start 51-100
-        document.getElementById('challenge-info').textContent = `Challenge: Subtract 4 (Start at ${currentNumber})`;
+
+      if (level === 'basic') {
+        currentNumber = value; // Start at the chosen number
+      } else if (level === 'advanced') {
+        if (operation === 'add') {
+          currentNumber = Math.floor(Math.random() * (100 - value * 5)) + 1; // Room for at least 5 steps
+        } else if (operation === 'subtract') {
+          currentNumber = Math.floor(Math.random() * 50) + 51; // 51-100 to avoid negatives early
+        }
       }
+
+      document.getElementById('challenge-info').textContent = 
+        `Challenge: ${operation === 'add' ? 'Add' : 'Subtract'} by ${value} (Start at ${currentNumber})`;
     }
 
     function checkAnswer(clickedNumber) {
@@ -138,7 +158,6 @@
     }
 
     function getExpectedNumber() {
-      if (operation === 'multiply') return currentNumber + value; // Add 2 for skip-counting
       if (operation === 'add') return currentNumber + value;
       if (operation === 'subtract') return currentNumber - value;
       return currentNumber; // Fallback
@@ -147,10 +166,7 @@
     function checkCompletion() {
       const nextNumber = getExpectedNumber();
       if (nextNumber > 100 || nextNumber < 1) {
-        let badgeName = '';
-        if (operation === 'multiply') badgeName = 'Double Master';
-        else if (operation === 'add') badgeName = 'Addition Ace';
-        else if (operation === 'subtract') badgeName = 'Subtraction Star';
+        let badgeName = operation === 'add' ? 'Addition Ace' : 'Subtraction Star';
         awardBadge(badgeName);
         alert(`Challenge Complete! You earned the "${badgeName}" badge!`);
       }
