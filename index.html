@@ -37,7 +37,7 @@
       border: 1px solid #000;
       background-color: #fff;
       cursor: pointer;
-      border-radius: 10px; /* Added for rounded corners */
+      border-radius: 10px;
     }
     .correct {
       background-color: #00ff00;
@@ -79,6 +79,8 @@
     // Game state for Multiply by 2
     let currentNumber = 2; // Starting number
     const multiplier = 2;  // Multiply by 2
+    let score = 0;         // Track score
+    let badges = [];       // Store earned badges
 
     function checkAnswer(clickedNumber) {
       const expectedNumber = currentNumber;
@@ -87,15 +89,34 @@
       if (clickedNumber === expectedNumber) {
         button.classList.add('correct');
         button.disabled = true; // Disable button after correct click
+        score += 10; // Add 10 points for each correct answer
+        document.getElementById('score').textContent = `Score: ${score}`;
         currentNumber += multiplier; // Move to next number in sequence
         if (currentNumber > 100) {
-          alert('Challenge Complete! Great job!');
+          awardBadge('Double Master');
+          alert('Challenge Complete! You earned the "Double Master" badge!');
         }
       } else {
         button.classList.add('incorrect');
         setTimeout(() => {
           button.classList.remove('incorrect');
         }, 500); // Remove red after 0.5 seconds
+      }
+    }
+
+    function awardBadge(badgeName) {
+      if (!badges.includes(badgeName)) { // Only add if not already earned
+        badges.push(badgeName);
+        updateBadgesDisplay();
+      }
+    }
+
+    function updateBadgesDisplay() {
+      const badgesDiv = document.getElementById('badges');
+      if (badges.length === 0) {
+        badgesDiv.textContent = 'Badges: None';
+      } else {
+        badgesDiv.textContent = 'Badges: ' + badges.join(', ');
       }
     }
   </script>
