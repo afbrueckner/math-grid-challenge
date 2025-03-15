@@ -108,12 +108,12 @@
       } else if (challenge === 'add-3') {
         operation = 'add';
         value = 3;
-        currentNumber = Math.floor(Math.random() * 90) + 1; // Random start 1-90 to allow room
+        currentNumber = Math.floor(Math.random() * 90) + 1; // Random start 1-90
         document.getElementById('challenge-info').textContent = `Challenge: Add 3 (Start at ${currentNumber})`;
       } else if (challenge === 'subtract-4') {
         operation = 'subtract';
         value = 4;
-        currentNumber = Math.floor(Math.random() * 50) + 51; // Random start 51-100 to avoid negatives
+        currentNumber = Math.floor(Math.random() * 50) + 51; // Random start 51-100
         document.getElementById('challenge-info').textContent = `Challenge: Subtract 4 (Start at ${currentNumber})`;
       }
     }
@@ -127,8 +127,7 @@
         button.disabled = true;
         score += 10;
         document.getElementById('score').textContent = `Score: ${score}`;
-        currentNumber = expectedNumber; // Update currentNumber for next step
-        moveToNextNumber();
+        currentNumber = expectedNumber; // Update to the number just clicked
         checkCompletion();
       } else {
         button.classList.add('incorrect');
@@ -142,16 +141,12 @@
       if (operation === 'multiply') return currentNumber * value;
       if (operation === 'add') return currentNumber + value;
       if (operation === 'subtract') return currentNumber - value;
-    }
-
-    function moveToNextNumber() {
-      if (operation === 'multiply') currentNumber = currentNumber * value / value; // Stay at current for next multiply
-      else if (operation === 'add') currentNumber += value;
-      else if (operation === 'subtract') currentNumber -= value;
+      return currentNumber; // Fallback
     }
 
     function checkCompletion() {
-      if (currentNumber > 100 || currentNumber < 1) {
+      const nextNumber = getExpectedNumber();
+      if (nextNumber > 100 || nextNumber < 1) {
         let badgeName = '';
         if (operation === 'multiply') badgeName = 'Double Master';
         else if (operation === 'add') badgeName = 'Addition Ace';
