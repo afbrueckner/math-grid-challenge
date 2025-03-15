@@ -57,10 +57,20 @@
     #badges {
       color: #800080;
     }
+    #challenge-select {
+      margin-bottom: 20px;
+      font-size: 18px;
+      padding: 5px;
+    }
   </style>
 </head>
 <body>
   <h1>Math Grid Challenge</h1>
+  <select id="challenge-select">
+    <option value="multiply-2">Multiply by 2</option>
+    <option value="add-3">Add 3</option>
+    <option value="subtract-4">Subtract 4</option>
+  </select>
   <div id="challenge-info">Challenge: Multiply by 2</div>
   <div id="grid"></div>
   <div id="score">Score: 0</div>
@@ -76,36 +86,83 @@
       grid.appendChild(button);
     }
 
-    // Game state for Multiply by 2
+    // Game state
     let currentNumber = 2; // Starting number
-    const multiplier = 2;  // Multiply by 2
-    let score = 0;         // Track score
-    let badges = [];       // Store earned badges
+    let operation = 'multiply'; // Current operation
+    let value = 2; // Operation value (e.g., multiply by 2, add 3)
+    let score = 0;
+    let badges = [];
+
+    // Challenge selection
+    const challengeSelect = document.getElementById('challenge-select');
+    challengeSelect.addEventListener('change', startChallenge);
+
+    function startChallenge() {
+      const challenge = challengeSelect.value;
+      resetGame();
+      if (challenge === 'multiply-2') {
+        operation = 'multiply';
+        value = 2;
+        currentNumber = 2;
+        document.getElementById('challenge-info').textContent = 'Challenge: Multiply by 2';
+      } else if (challenge === 'add-3') {
+        operation = 'add';
+        value = 3;
+        currentNumber = Math.floor(Math.random() * 90) + 1; // Random start 1-90 to allow room
+        document.getElementById('challenge-info').textContent = `Challenge: Add 3 (Start at ${currentNumber})`;
+      } else if (challenge === 'subtract-4') {
+        operation = 'subtract';
+        value = 4;
+        currentNumber = Math.floor(Math.random() * 50) + 51; // Random start 51-100 to avoid negatives
+        document.getElementById('challenge-info').textContent = `Challenge: Subtract 4 (Start at ${currentNumber})`;
+      }
+    }
 
     function checkAnswer(clickedNumber) {
-      const expectedNumber = currentNumber;
-      const button = grid.children[clickedNumber - 1]; // Get the clicked button
+      const expectedNumber = getExpectedNumber();
+      const button = grid.children[clickedNumber - 1];
 
       if (clickedNumber === expectedNumber) {
         button.classList.add('correct');
-        button.disabled = true; // Disable button after correct click
-        score += 10; // Add 10 points for each correct answer
+        button.disabled = true;
+        score += 10;
         document.getElementById('score').textContent = `Score: ${score}`;
-        currentNumber += multiplier; // Move to next number in sequence
-        if (currentNumber > 100) {
-          awardBadge('Double Master');
-          alert('Challenge Complete! You earned the "Double Master" badge!');
-        }
+        currentNumber = expectedNumber; // Update currentNumber for next step
+        moveToNextNumber();
+        checkCompletion();
       } else {
         button.classList.add('incorrect');
         setTimeout(() => {
           button.classList.remove('incorrect');
-        }, 500); // Remove red after 0.5 seconds
+        }, 500);
+      }
+    }
+
+    function getExpectedNumber() {
+      if (operation === 'multiply') return currentNumber * value;
+      if (operation === 'add') return currentNumber + value;
+      if (operation === 'subtract') return currentNumber - value;
+    }
+
+    function moveToNextNumber() {
+      if (operation === 'multiply') currentNumber = currentNumber * value / value; // Stay at current for next multiply
+      else if (operation === 'add') currentNumber += value;
+      else if (operation === 'subtract') currentNumber -= value;
+    }
+
+    function checkCompletion() {
+      if (currentNumber > 100 || currentNumber < 1) {
+        let badgeName = '';
+        if (operation === 'multiply') badgeName = 'Double Master';
+        else if (operation === 'add') badgeName = 'Addition Ace';
+        else if (operation === 'subtract') badgeName = 'Subtraction Star';
+        awardBadge(badgeName);
+        alert(`Challenge Complete! You earned the "${badgeName}" badge!`);
       }
     }
 
     function awardBadge(badgeName) {
-      if (!badges.includes(badgeName)) { // Only add if not already earned
+      if (!badges.includes(badgeName)) {
         badges.push(badgeName);
         updateBadgesDisplay();
       }
@@ -119,6 +176,18 @@
         badgesDiv.textContent = 'Badges: ' + badges.join(', ');
       }
     }
+
+    function resetGame() {
+      score = 0;
+      document.getElementById('score').textContent = 'Score: 0';
+      for (let button of grid.children) {
+        button.classList.remove('correct');
+        button.disabled = false;
+      }
+    }
+
+    // Start with default challenge
+    startChallenge();
   </script>
 </body>
 </html>
