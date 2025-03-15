@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Math Grid Challenge</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background: linear-gradient(to bottom, #add8e6, #ffffff);
+      margin: 0;
+      padding: 20px;
+    }
+    h1 {
+      color: #00008b;
+      font-size: 36px;
+      margin-bottom: 10px;
+    }
+    #challenge-info {
+      background-color: #ffffe0;
+      padding: 10px;
+      border-radius: 5px;
+      font-size: 20px;
+      margin-bottom: 20px;
+    }
+    #grid {
+      display: grid;
+      grid-template-columns: repeat(10, 50px);
+      gap: 5px;
+      margin: 0 auto;
+      width: fit-content;
+    }
+    button {
+      width: 50px;
+      height: 50px;
+      font-size: 18px;
+      border: 1px solid #000;
+      background-color: #fff;
+      cursor: pointer;
+    }
+    #score, #badges {
+      margin-top: 20px;
+      font-size: 18px;
+    }
+    #score {
+      color: #006400;
+    }
+    #badges {
+      color: #800080;
+    }
+  </style>
+</head>
+<body>
+  <h1>Math Grid Challenge</h1>
+  <div id="challenge-info">Challenge: Multiply by 2</div>
+  <div id="grid"></div>
+  <div id="score">Score: 0</div>
+  <div id="badges">Badges: None</div>
+
+  <script>
+    // Create the 10x10 grid
+    const grid = document.getElementById('grid');
+    for (let i = 1; i <= 100; i++) {
+      const button = document.createElement('button');
+      button.textContent = i;
+      grid.appendChild(button);
+    }
+  </script>
+</body>
+</html>
