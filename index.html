@@ -37,6 +37,15 @@
       border: 1px solid #000;
       background-color: #fff;
       cursor: pointer;
+      border-radius: 10px; /* Added for rounded corners */
+    }
+    .correct {
+      background-color: #00ff00;
+      color: #fff;
+    }
+    .incorrect {
+      background-color: #ff0000;
+      color: #fff;
     }
     #score, #badges {
       margin-top: 20px;
@@ -63,7 +72,31 @@
     for (let i = 1; i <= 100; i++) {
       const button = document.createElement('button');
       button.textContent = i;
+      button.addEventListener('click', () => checkAnswer(i));
       grid.appendChild(button);
+    }
+
+    // Game state for Multiply by 2
+    let currentNumber = 2; // Starting number
+    const multiplier = 2;  // Multiply by 2
+
+    function checkAnswer(clickedNumber) {
+      const expectedNumber = currentNumber;
+      const button = grid.children[clickedNumber - 1]; // Get the clicked button
+
+      if (clickedNumber === expectedNumber) {
+        button.classList.add('correct');
+        button.disabled = true; // Disable button after correct click
+        currentNumber += multiplier; // Move to next number in sequence
+        if (currentNumber > 100) {
+          alert('Challenge Complete! Great job!');
+        }
+      } else {
+        button.classList.add('incorrect');
+        setTimeout(() => {
+          button.classList.remove('incorrect');
+        }, 500); // Remove red after 0.5 seconds
+      }
     }
   </script>
 </body>
