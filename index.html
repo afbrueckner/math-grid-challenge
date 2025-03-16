@@ -289,7 +289,6 @@
       startButton.classList.add('correct');
       startButton.disabled = true;
       clicksInRound = 1; // Start counts as first "click"
-      console.log(`Start: mode=${mode}, operation=${operation}, value=${value}, currentNumber=${currentNumber}, sequence=${factFamilySequence}, clicksInRound=${clicksInRound}`);
     }
 
     function generateFactFamilySequence(n, op) {
@@ -310,7 +309,7 @@
     function checkAnswer(clickedNumber) {
       const expectedNumber = getExpectedNumber();
       const button = grid.children[clickedNumber - 1];
-      console.log(`Clicked: ${clickedNumber}, Expected: ${expectedNumber}, clicksInRound=${clicksInRound}, sequence=${factFamilySequence}`);
+      console.log(`Clicked: ${clickedNumber}, Expected: ${expectedNumber}, clicksInRound=${clicksInRound}`);
 
       if (clickedNumber === expectedNumber) {
         button.classList.add('correct');
@@ -332,7 +331,7 @@
     function getExpectedNumber() {
       if (mode === 'single') {
         return operation === 'add' ? currentNumber + value : currentNumber - value;
-      } else if (mode === 'fact-family' && clicksInRound <= 4) { // Changed to <= 4 for 5 total clicks
+      } else if (mode === 'fact-family' && clicksInRound <= 4) {
         return factFamilySequence[clicksInRound];
       }
       return null;
@@ -356,13 +355,9 @@
         factFamilyPasses[factFamilyKey] = (factFamilyPasses[factFamilyKey] || 0) + 1;
         localStorage.setItem('factFamilyPasses', JSON.stringify(factFamilyPasses));
         
-        console.log(`Fact Family Complete: clicksInRound=${clicksInRound}, value=${value}, passes=${factFamilyPasses[factFamilyKey]}`);
         transitionMessage.textContent = `Great Job! Moving to next fact... (Passes: ${factFamilyPasses[factFamilyKey]})`;
         transitionMessage.style.display = 'block';
-        console.log(`Transition Message Set: ${transitionMessage.textContent}, display=${transitionMessage.style.display}`);
-        alert(`DEBUG: Transition should appear! Passes: ${factFamilyPasses[factFamilyKey]}`);
         setTimeout(() => {
-          console.log(`Hiding Transition: display=${transitionMessage.style.display}`);
           transitionMessage.style.display = 'none';
           if (factFamilyPasses[factFamilyKey] >= 3) {
             awardBadge(getBadgeName());
