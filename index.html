@@ -350,23 +350,24 @@
           alert(`Challenge Complete! Passes: ${factFamilyPasses[factFamilyKey]}`);
           startChallenge();
         }
-      } else if (mode === 'fact-family' && clicksInRound === 5) { // Changed to === 5 for exact trigger
+      } else if (mode === 'fact-family' && clicksInRound === 5) {
         let factFamilyKey = `${mode}-${operation}-${value}-${level}`;
         factFamilyPasses[factFamilyKey] = (factFamilyPasses[factFamilyKey] || 0) + 1;
         localStorage.setItem('factFamilyPasses', JSON.stringify(factFamilyPasses));
         
-        console.log(`Completion reached: clicksInRound=${clicksInRound}`);
+        console.log(`Fact Family Complete: clicksInRound=${clicksInRound}, value=${value}, passes=${factFamilyPasses[factFamilyKey]}`);
         transitionMessage.textContent = `Great Job! Moving to next fact... (Passes: ${factFamilyPasses[factFamilyKey]})`;
         transitionMessage.style.display = 'block';
-        console.log(`Showing transition: ${transitionMessage.textContent}`);
+        console.log(`Transition Message Set: ${transitionMessage.textContent}, display=${transitionMessage.style.display}`);
+        alert(`DEBUG: Should see transition message now! Passes: ${factFamilyPasses[factFamilyKey]}`); // Fallback
         setTimeout(() => {
-          console.log(`Hiding transition after 1s`);
+          console.log(`Hiding Transition: display=${transitionMessage.style.display}`);
           transitionMessage.style.display = 'none';
           if (factFamilyPasses[factFamilyKey] >= 3) {
             awardBadge(getBadgeName());
           }
           moveToNextFact();
-        }, 1000); // Reduced to 1s for testing
+        }, 1500); // Back to 1.5s
       }
     }
 
