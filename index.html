@@ -13,51 +13,54 @@
     }
     h1 {
       color: #00008b;
-      font-size: 40px; /* Slightly larger title */
+      font-size: 40px;
       margin-bottom: 15px;
     }
     #challenge-info {
       background-color: #ffffe0;
       padding: 12px;
       border-radius: 8px;
-      font-size: 22px; /* Larger text */
+      font-size: 22px;
       margin-bottom: 25px;
       border: 1px solid #ccc;
     }
     #grid {
       display: grid;
-      grid-template-columns: repeat(10, 60px); /* Larger buttons */
-      gap: 8px; /* More spacing */
+      grid-template-columns: repeat(10, 50px); /* Back to original size */
+      gap: 5px; /* Back to original spacing */
       margin: 0 auto;
       width: fit-content;
     }
     button {
-      width: 60px; /* Larger buttons */
-      height: 60px;
-      font-size: 24px; /* Larger numbers */
-      border: 2px solid #333; /* Thicker, darker border */
+      width: 50px; /* Back to original size */
+      height: 50px;
+      font-size: 18px; /* Back to original font size */
+      border: 2px solid #333;
       background-color: #fff;
       cursor: pointer;
-      border-radius: 12px; /* Slightly larger radius */
-      color: #000; /* High contrast */
-      transition: background-color 0.2s; /* Smooth hover transition */
+      border-radius: 10px; /* Keep rounded corners */
+      color: #000;
+      transition: background-color 0.2s;
+      display: flex; /* Center numbers */
+      align-items: center; /* Vertically center */
+      justify-content: center; /* Horizontally center */
     }
     button:hover:not(.correct):not(:disabled) {
-      background-color: #f0f0f0; /* Subtle hover effect */
+      background-color: #f0f0f0;
     }
     .correct {
-      background-color: #90ee90; /* Softer green */
+      background-color: #90ee90;
       color: #fff;
-      border-color: #006400; /* Darker green border */
+      border-color: #006400;
     }
     .incorrect {
-      background-color: #ff6347; /* Softer red (tomato) */
+      background-color: #ff6347;
       color: #fff;
-      border-color: #8b0000; /* Darker red border */
+      border-color: #8b0000;
     }
     #score, #badges {
       margin-top: 25px;
-      font-size: 20px; /* Larger text */
+      font-size: 20px;
       padding: 10px;
       border-radius: 8px;
       display: inline-block;
@@ -65,12 +68,12 @@
     }
     #score {
       color: #006400;
-      background-color: #e0ffe0; /* Light green box */
+      background-color: #e0ffe0;
       border: 1px solid #006400;
     }
     #badges {
       color: #800080;
-      background-color: #f0e6ff; /* Light purple box */
+      background-color: #f0e6ff;
       border: 1px solid #800080;
     }
     #operation-select, #number-select, #level-select {
