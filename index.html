@@ -139,6 +139,8 @@
       display: none;
       z-index: 1000;
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      border: 2px solid #006400;
+      opacity: 1;
     }
     @keyframes pulse {
       0% { transform: scale(1); }
@@ -348,21 +350,23 @@
           alert(`Challenge Complete! Passes: ${factFamilyPasses[factFamilyKey]}`);
           startChallenge();
         }
-      } else if (mode === 'fact-family' && clicksInRound >= 5) {
+      } else if (mode === 'fact-family' && clicksInRound === 5) { // Changed to === 5 for exact trigger
         let factFamilyKey = `${mode}-${operation}-${value}-${level}`;
         factFamilyPasses[factFamilyKey] = (factFamilyPasses[factFamilyKey] || 0) + 1;
         localStorage.setItem('factFamilyPasses', JSON.stringify(factFamilyPasses));
         
+        console.log(`Completion reached: clicksInRound=${clicksInRound}`);
         transitionMessage.textContent = `Great Job! Moving to next fact... (Passes: ${factFamilyPasses[factFamilyKey]})`;
         transitionMessage.style.display = 'block';
-        console.log(`Transition triggered: ${transitionMessage.textContent}`);
+        console.log(`Showing transition: ${transitionMessage.textContent}`);
         setTimeout(() => {
+          console.log(`Hiding transition after 1s`);
           transitionMessage.style.display = 'none';
           if (factFamilyPasses[factFamilyKey] >= 3) {
             awardBadge(getBadgeName());
           }
           moveToNextFact();
-        }, 1500);
+        }, 1000); // Reduced to 1s for testing
       }
     }
 
