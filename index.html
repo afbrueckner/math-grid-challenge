@@ -26,24 +26,24 @@
     }
     #grid {
       display: grid;
-      grid-template-columns: repeat(10, 50px); /* Back to original size */
-      gap: 5px; /* Back to original spacing */
+      grid-template-columns: repeat(10, 50px);
+      gap: 5px;
       margin: 0 auto;
       width: fit-content;
     }
     button {
-      width: 50px; /* Back to original size */
+      width: 50px;
       height: 50px;
-      font-size: 18px; /* Back to original font size */
+      font-size: 18px;
       border: 2px solid #333;
       background-color: #fff;
       cursor: pointer;
-      border-radius: 10px; /* Keep rounded corners */
+      border-radius: 10px;
       color: #000;
       transition: background-color 0.2s;
-      display: flex; /* Center numbers */
-      align-items: center; /* Vertically center */
-      justify-content: center; /* Horizontally center */
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
     button:hover:not(.correct):not(:disabled) {
       background-color: #f0f0f0;
@@ -64,7 +64,7 @@
       padding: 10px;
       border-radius: 8px;
       display: inline-block;
-      width: 200px;
+      width: 300px; /* Wider to fit icons */
     }
     #score {
       color: #006400;
@@ -85,6 +85,9 @@
       border: 1px solid #333;
       background-color: #fff;
       cursor: pointer;
+    }
+    .badge-icon {
+      margin-right: 5px; /* Space between icon and text */
     }
   </style>
 </head>
@@ -132,6 +135,12 @@
     let level = 'basic';
     let score = 0;
     let badges = [];
+
+    // Badge icons (using Unicode emojis)
+    const badgeIcons = {
+      'Addition Ace': '🏆', // Trophy
+      'Subtraction Star': '⭐' // Star
+    };
 
     // Dropdowns
     const operationSelect = document.getElementById('operation-select');
@@ -217,7 +226,9 @@
       if (badges.length === 0) {
         badgesDiv.textContent = 'Badges: None';
       } else {
-        badgesDiv.textContent = 'Badges: ' + badges.join(', ');
+        badgesDiv.innerHTML = 'Badges: ' + badges.map(badge => 
+          `<span class="badge-icon">${badgeIcons[badge]}</span>${badge}`
+        ).join(', ');
       }
     }
 
