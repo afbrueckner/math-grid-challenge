@@ -99,8 +99,8 @@
       border: 1px solid #333;
       background-color: #fff;
       cursor: pointer;
-      min-width: 100px; /* Minimum width */
-      width: auto; /* Fit content */
+      min-width: 100px;
+      width: auto;
     }
     #reset-button, #hint-button {
       margin-top: 15px;
@@ -260,7 +260,7 @@
           `Challenge: ${operation === 'add' ? 'Add' : 'Subtract'} by ${value} (Start at ${currentNumber})`;
       } else if (mode === 'fact-family') {
         factFamily = getFactFamily(value);
-        factFamilyIndex = operation === 'add' ? 0 : 2; // Start at smallest (add) or largest (subtract)
+        factFamilyIndex = operation === 'add' ? 0 : factFamily.length - 1; // Add: start low, Subtract: start high
         currentNumber = factFamily[factFamilyIndex];
         document.getElementById('challenge-info').textContent = 
           `Challenge: Fact Family ${factFamily.join(', ')} (${operation === 'add' ? 'Add' : 'Subtract'}, Start at ${currentNumber})`;
@@ -269,6 +269,7 @@
       const startButton = grid.children[currentNumber - 1];
       startButton.classList.add('correct');
       startButton.disabled = true;
+      console.log(`Started: mode=${mode}, operation=${operation}, value=${value}, currentNumber=${currentNumber}, factFamily=${factFamily}`);
     }
 
     function getFactFamily(n) {
@@ -283,6 +284,7 @@
     function checkAnswer(clickedNumber) {
       const expectedNumber = getExpectedNumber();
       const button = grid.children[clickedNumber - 1];
+      console.log(`Clicked: ${clickedNumber}, Expected: ${expectedNumber}, Index: ${factFamilyIndex}`);
 
       if (clickedNumber === expectedNumber) {
         button.classList.add('correct');
@@ -310,7 +312,10 @@
       if (mode === 'single') {
         return operation === 'add' ? currentNumber + value : currentNumber - value;
       } else if (mode === 'fact-family') {
-        return factFamily[factFamilyIndex];
+        let nextIndex = operation === 'add' ? 
+          (factFamilyIndex + 1) % factFamily.length : 
+          (factFamilyIndex - 1 + factFamily.length) % factFamily.length;
+        return factFamily[nextIndex];
       }
       return currentNumber;
     }
