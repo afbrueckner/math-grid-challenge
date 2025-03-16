@@ -188,7 +188,7 @@
     let score = 0;
     let totalScore = 0;
     let badges = [];
-    let factFamily = [];
+    let factFamilySequence = [];
     let factFamilyIndex = 0;
     let clicksInRound = 0;
 
@@ -259,26 +259,32 @@
         document.getElementById('challenge-info').textContent = 
           `Challenge: ${operation === 'add' ? 'Add' : 'Subtract'} by ${value} (Start at ${currentNumber})`;
       } else if (mode === 'fact-family') {
-        factFamily = getFactFamily(value);
-        factFamilyIndex = operation === 'add' ? 0 : factFamily.length - 1; // Add: start low, Subtract: start high
-        currentNumber = factFamily[factFamilyIndex];
+        factFamilySequence = generateFactFamilySequence(value, operation);
+        factFamilyIndex = 0;
+        currentNumber = factFamilySequence[0];
         document.getElementById('challenge-info').textContent = 
-          `Challenge: Fact Family ${factFamily.join(', ')} (${operation === 'add' ? 'Add' : 'Subtract'}, Start at ${currentNumber})`;
+          `Challenge: ${operation === 'add' ? 'Add' : 'Subtract'} by ${value} (${factFamilySequence.slice(0, 5).join(', ')}, Start at ${currentNumber})`;
       }
 
       const startButton = grid.children[currentNumber - 1];
       startButton.classList.add('correct');
       startButton.disabled = true;
-      console.log(`Started: mode=${mode}, operation=${operation}, value=${value}, currentNumber=${currentNumber}, factFamily=${factFamily}`);
+      console.log(`Started: mode=${mode}, operation=${operation}, value=${value}, currentNumber=${currentNumber}, sequence=${factFamilySequence}`);
     }
 
-    function getFactFamily(n) {
-      const families = {
-        1: [1, 2, 3], 2: [2, 3, 5], 5: [5, 6, 11], 10: [10, 11, 21],
-        3: [3, 4, 7], 4: [4, 5, 9], 6: [6, 7, 13], 7: [7, 8, 15],
-        8: [8, 9, 17], 9: [9, 10, 19], 11: [11, 12, 23], 12: [12, 13, 25]
-      };
-      return families[n];
+    function generateFactFamilySequence(n, op) {
+      let sequence = [];
+      if (op === 'add') {
+        for (let i = 0; i < 5; i++) {
+          sequence.push(n * (i + 1)); // e.g., 5 → 5, 10, 15, 20, 25
+        }
+      } else {
+        let start = Math.floor(100 / n) * n; // Start at highest multiple ≤ 100
+        for (let i = 0; i < 5; i++) {
+          sequence.push(start - n * i); // e.g., 5 → 25, 20, 15, 10, 5
+        }
+      }
+      return sequence;
     }
 
     function checkAnswer(clickedNumber) {
@@ -295,12 +301,8 @@
         document.getElementById('total-score').textContent = `Total Score: ${totalScore}`;
         currentNumber = expectedNumber;
         clicksInRound++;
+        factFamilyIndex++;
         correctSound.play().catch(() => {});
-        if (mode === 'fact-family') {
-          factFamilyIndex = operation === 'add' ? 
-            (factFamilyIndex + 1) % factFamily.length : 
-            (factFamilyIndex - 1 + factFamily.length) % factFamily.length;
-        }
         checkCompletion();
       } else {
         button.classList.add('incorrect');
@@ -312,10 +314,7 @@
       if (mode === 'single') {
         return operation === 'add' ? currentNumber + value : currentNumber - value;
       } else if (mode === 'fact-family') {
-        let nextIndex = operation === 'add' ? 
-          (factFamilyIndex + 1) % factFamily.length : 
-          (factFamilyIndex - 1 + factFamily.length) % factFamily.length;
-        return factFamily[nextIndex];
+        return factFamilySequence[factFamilyIndex + 1];
       }
       return currentNumber;
     }
@@ -382,6 +381,7 @@
     function resetLevel() {
       score = 0;
       clicksInRound = 0;
+      factFamilyIndex = 0;
       document.getElementById('score').textContent = 'Score: 0';
       for (let button of grid.children) {
         button.classList.remove('correct');
