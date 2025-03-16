@@ -90,7 +90,7 @@
       background-color: #f0e6ff;
       border: 1px solid #800080;
     }
-    #mode-select, #number-select, #level-select {
+    #mode-select, #operation-select, #number-select, #level-select {
       margin-bottom: 10px;
       font-size: 18px;
       padding: 8px;
@@ -99,7 +99,8 @@
       border: 1px solid #333;
       background-color: #fff;
       cursor: pointer;
-      width: 100px;
+      min-width: 100px; /* Minimum width */
+      width: auto; /* Fit content */
     }
     #reset-button, #hint-button {
       margin-top: 15px;
@@ -135,7 +136,11 @@
       #challenge-info { font-size: 18px; }
       #grid { grid-template-columns: repeat(10, 35px); }
       button { width: 35px; height: 35px; font-size: 14px; }
-      #mode-select, #number-select, #level-select { width: 90px; font-size: 16px; }
+      #mode-select, #operation-select, #number-select, #level-select {
+        font-size: 16px;
+        min-width: 90px;
+        width: auto;
+      }
       #score, #total-score, #badges { font-size: 16px; padding: 8px; }
       #reset-button, #hint-button { font-size: 16px; padding: 8px 16px; }
     }
@@ -146,6 +151,10 @@
   <select id="mode-select">
     <option value="single">Single Number</option>
     <option value="fact-family">Fact Family</option>
+  </select>
+  <select id="operation-select">
+    <option value="add">Add</option>
+    <option value="subtract">Subtract</option>
   </select>
   <select id="number-select"></select>
   <select id="level-select">
@@ -173,6 +182,7 @@
     // Game state
     let currentNumber = 2;
     let mode = 'single';
+    let operation = 'add';
     let value = 2;
     let level = 'basic';
     let score = 0;
@@ -195,16 +205,18 @@
     const easyFacts = [1, 2, 5, 10];
     const hardFacts = [3, 4, 6, 7, 8, 9, 11, 12];
 
-    // Sound (chime sound - using a free online source)
+    // Sound (chime)
     const correctSound = new Audio('https://www.soundjay.com/buttons/chime-01a.mp3');
 
     // Controls
     const modeSelect = document.getElementById('mode-select');
+    const operationSelect = document.getElementById('operation-select');
     const numberSelect = document.getElementById('number-select');
     const levelSelect = document.getElementById('level-select');
     const resetButton = document.getElementById('reset-button');
     const hintButton = document.getElementById('hint-button');
     modeSelect.addEventListener('change', updateNumberOptions);
+    operationSelect.addEventListener('change', startChallenge);
     levelSelect.addEventListener('change', updateNumberOptions);
     modeSelect.addEventListener('change', startChallenge);
     numberSelect.addEventListener('change', startChallenge);
@@ -231,24 +243,27 @@
 
     function startChallenge() {
       mode = modeSelect.value;
+      operation = operationSelect.value;
       value = parseInt(numberSelect.value);
       level = levelSelect.value;
       resetLevel();
 
       if (mode === 'single') {
         if (level === 'basic') {
-          currentNumber = value;
+          currentNumber = operation === 'add' ? value : Math.floor(100 / value) * value;
+          if (currentNumber > 100) currentNumber = 100;
         } else {
-          currentNumber = Math.floor(Math.random() * (100 - value * 5)) + 1;
+          currentNumber = operation === 'add' ? Math.floor(Math.random() * (100 - value * 5)) + 1 :
+                          Math.floor(Math.random() * 50) + 51;
         }
         document.getElementById('challenge-info').textContent = 
-          `Challenge: Add by ${value} (Start at ${currentNumber})`;
+          `Challenge: ${operation === 'add' ? 'Add' : 'Subtract'} by ${value} (Start at ${currentNumber})`;
       } else if (mode === 'fact-family') {
         factFamily = getFactFamily(value);
-        factFamilyIndex = 0;
-        currentNumber = factFamily[0];
+        factFamilyIndex = operation === 'add' ? 0 : 2; // Start at smallest (add) or largest (subtract)
+        currentNumber = factFamily[factFamilyIndex];
         document.getElementById('challenge-info').textContent = 
-          `Challenge: Fact Family ${factFamily.join(', ')} (Start at ${currentNumber})`;
+          `Challenge: Fact Family ${factFamily.join(', ')} (${operation === 'add' ? 'Add' : 'Subtract'}, Start at ${currentNumber})`;
       }
 
       const startButton = grid.children[currentNumber - 1];
@@ -278,9 +293,11 @@
         document.getElementById('total-score').textContent = `Total Score: ${totalScore}`;
         currentNumber = expectedNumber;
         clicksInRound++;
-        correctSound.play().catch(() => {}); // Play chime, ignore errors
+        correctSound.play().catch(() => {});
         if (mode === 'fact-family') {
-          factFamilyIndex = (factFamilyIndex + 1) % factFamily.length;
+          factFamilyIndex = operation === 'add' ? 
+            (factFamilyIndex + 1) % factFamily.length : 
+            (factFamilyIndex - 1 + factFamily.length) % factFamily.length;
         }
         checkCompletion();
       } else {
@@ -291,7 +308,7 @@
 
     function getExpectedNumber() {
       if (mode === 'single') {
-        return currentNumber + value;
+        return operation === 'add' ? currentNumber + value : currentNumber - value;
       } else if (mode === 'fact-family') {
         return factFamily[factFamilyIndex];
       }
@@ -301,8 +318,8 @@
     function checkCompletion() {
       if (mode === 'single') {
         const nextNumber = getExpectedNumber();
-        if (nextNumber > 100) {
-          let factFamilyKey = `${mode}-${value}-${level}`;
+        if (nextNumber > 100 || nextNumber < 1) {
+          let factFamilyKey = `${mode}-${operation}-${value}-${level}`;
           factFamilyPasses[factFamilyKey] = (factFamilyPasses[factFamilyKey] || 0) + 1;
           localStorage.setItem('factFamilyPasses', JSON.stringify(factFamilyPasses));
           if (factFamilyPasses[factFamilyKey] >= 3) {
@@ -312,7 +329,7 @@
           startChallenge();
         }
       } else if (mode === 'fact-family' && clicksInRound >= 5) {
-        let factFamilyKey = `${mode}-${value}-${level}`;
+        let factFamilyKey = `${mode}-${operation}-${value}-${level}`;
         factFamilyPasses[factFamilyKey] = (factFamilyPasses[factFamilyKey] || 0) + 1;
         localStorage.setItem('factFamilyPasses', JSON.stringify(factFamilyPasses));
         if (factFamilyPasses[factFamilyKey] >= 3) {
