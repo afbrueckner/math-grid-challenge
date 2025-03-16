@@ -58,18 +58,23 @@
       color: #fff;
       border-color: #8b0000;
     }
-    #score, #badges {
+    #score, #total-score, #badges {
       margin-top: 25px;
       font-size: 20px;
       padding: 10px;
       border-radius: 8px;
       display: inline-block;
-      width: 300px; /* Wider to fit icons */
+      width: 300px;
     }
     #score {
       color: #006400;
       background-color: #e0ffe0;
       border: 1px solid #006400;
+    }
+    #total-score {
+      color: #2f4f4f; /* Dark slate gray */
+      background-color: #e6f0fa; /* Light blue */
+      border: 1px solid #2f4f4f;
     }
     #badges {
       color: #800080;
@@ -86,8 +91,22 @@
       background-color: #fff;
       cursor: pointer;
     }
+    #reset-button {
+      margin-top: 20px;
+      font-size: 18px;
+      padding: 10px 20px;
+      background-color: #ff4500; /* Orange-red */
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    #reset-button:hover {
+      background-color: #ff6347; /* Lighter red on hover */
+    }
     .badge-icon {
-      margin-right: 5px; /* Space between icon and text */
+      margin-right: 5px;
     }
   </style>
 </head>
@@ -116,7 +135,9 @@
   <div id="challenge-info">Challenge: Add by 2</div>
   <div id="grid"></div>
   <div id="score">Score: 0</div>
+  <div id="total-score">Total Score: 0</div>
   <div id="badges">Badges: None</div>
+  <button id="reset-button">Reset Game</button>
 
   <script>
     // Create the 10x10 grid
@@ -134,27 +155,30 @@
     let value = 2;
     let level = 'basic';
     let score = 0;
+    let totalScore = 0; // Persistent total score
     let badges = [];
 
-    // Badge icons (using Unicode emojis)
+    // Badge icons
     const badgeIcons = {
-      'Addition Ace': '🏆', // Trophy
-      'Subtraction Star': '⭐' // Star
+      'Addition Ace': '🏆',
+      'Subtraction Star': '⭐'
     };
 
-    // Dropdowns
+    // Dropdowns and reset button
     const operationSelect = document.getElementById('operation-select');
     const numberSelect = document.getElementById('number-select');
     const levelSelect = document.getElementById('level-select');
+    const resetButton = document.getElementById('reset-button');
     operationSelect.addEventListener('change', startChallenge);
     numberSelect.addEventListener('change', startChallenge);
     levelSelect.addEventListener('change', startChallenge);
+    resetButton.addEventListener('click', resetGame);
 
     function startChallenge() {
       operation = operationSelect.value;
       value = parseInt(numberSelect.value);
       level = levelSelect.value;
-      resetGame();
+      resetLevel(); // Reset only the current level, not total score or badges
 
       if (level === 'basic') {
         if (operation === 'add') {
@@ -188,7 +212,9 @@
         button.classList.add('correct');
         button.disabled = true;
         score += 10;
+        totalScore += 10; // Add to total score
         document.getElementById('score').textContent = `Score: ${score}`;
+        document.getElementById('total-score').textContent = `Total Score: ${totalScore}`;
         currentNumber = expectedNumber;
         checkCompletion();
       } else {
@@ -232,13 +258,27 @@
       }
     }
 
-    function resetGame() {
-      score = 0;
+    function resetLevel() {
+      score = 0; // Reset current level score only
       document.getElementById('score').textContent = 'Score: 0';
       for (let button of grid.children) {
         button.classList.remove('correct');
         button.disabled = false;
       }
+    }
+
+    function resetGame() {
+      score = 0;
+      totalScore = 0; // Reset total score too
+      badges = [];
+      document.getElementById('score').textContent = 'Score: 0';
+      document.getElementById('total-score').textContent = 'Total Score: 0';
+      updateBadgesDisplay();
+      for (let button of grid.children) {
+        button.classList.remove('correct');
+        button.disabled = false;
+      }
+      startChallenge(); // Restart with current dropdown settings
     }
 
     // Start with default challenge
