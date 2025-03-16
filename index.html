@@ -189,7 +189,6 @@
     let totalScore = 0;
     let badges = [];
     let factFamilySequence = [];
-    let factFamilyIndex = 0;
     let clicksInRound = 0;
 
     // Load mastery data
@@ -260,16 +259,15 @@
           `Challenge: ${operation === 'add' ? 'Add' : 'Subtract'} by ${value} (Start at ${currentNumber})`;
       } else if (mode === 'fact-family') {
         factFamilySequence = generateFactFamilySequence(value, operation);
-        factFamilyIndex = 0;
         currentNumber = factFamilySequence[0];
         document.getElementById('challenge-info').textContent = 
-          `Challenge: ${operation === 'add' ? 'Add' : 'Subtract'} by ${value} (${factFamilySequence.slice(0, 5).join(', ')}, Start at ${currentNumber})`;
+          `Challenge: ${operation === 'add' ? 'Add' : 'Subtract'} by ${value} (${factFamilySequence.join(', ')}, Start at ${currentNumber})`;
       }
 
       const startButton = grid.children[currentNumber - 1];
       startButton.classList.add('correct');
       startButton.disabled = true;
-      console.log(`Started: mode=${mode}, operation=${operation}, value=${value}, currentNumber=${currentNumber}, sequence=${factFamilySequence}`);
+      console.log(`Start: mode=${mode}, operation=${operation}, value=${value}, currentNumber=${currentNumber}, sequence=${factFamilySequence}`);
     }
 
     function generateFactFamilySequence(n, op) {
@@ -279,7 +277,7 @@
           sequence.push(n * (i + 1)); // e.g., 5 → 5, 10, 15, 20, 25
         }
       } else {
-        let start = Math.floor(100 / n) * n; // Start at highest multiple ≤ 100
+        let start = Math.floor(100 / n) * n; // Highest multiple ≤ 100
         for (let i = 0; i < 5; i++) {
           sequence.push(start - n * i); // e.g., 5 → 25, 20, 15, 10, 5
         }
@@ -290,7 +288,7 @@
     function checkAnswer(clickedNumber) {
       const expectedNumber = getExpectedNumber();
       const button = grid.children[clickedNumber - 1];
-      console.log(`Clicked: ${clickedNumber}, Expected: ${expectedNumber}, Index: ${factFamilyIndex}`);
+      console.log(`Clicked: ${clickedNumber}, Expected: ${expectedNumber}, clicksInRound=${clicksInRound}, sequence=${factFamilySequence}`);
 
       if (clickedNumber === expectedNumber) {
         button.classList.add('correct');
@@ -301,7 +299,6 @@
         document.getElementById('total-score').textContent = `Total Score: ${totalScore}`;
         currentNumber = expectedNumber;
         clicksInRound++;
-        factFamilyIndex++;
         correctSound.play().catch(() => {});
         checkCompletion();
       } else {
@@ -313,10 +310,10 @@
     function getExpectedNumber() {
       if (mode === 'single') {
         return operation === 'add' ? currentNumber + value : currentNumber - value;
-      } else if (mode === 'fact-family') {
-        return factFamilySequence[factFamilyIndex + 1];
+      } else if (mode === 'fact-family' && clicksInRound < 4) {
+        return factFamilySequence[clicksInRound + 1];
       }
-      return currentNumber;
+      return null; // No expected number after 4 clicks (5th is last)
     }
 
     function checkCompletion() {
@@ -373,15 +370,16 @@
 
     function showHint() {
       const expectedNumber = getExpectedNumber();
-      const button = grid.children[expectedNumber - 1];
-      button.classList.add('hint');
-      setTimeout(() => button.classList.remove('hint'), 1000);
+      if (expectedNumber) {
+        const button = grid.children[expectedNumber - 1];
+        button.classList.add('hint');
+        setTimeout(() => button.classList.remove('hint'), 1000);
+      }
     }
 
     function resetLevel() {
       score = 0;
       clicksInRound = 0;
-      factFamilyIndex = 0;
       document.getElementById('score').textContent = 'Score: 0';
       for (let button of grid.children) {
         button.classList.remove('correct');
