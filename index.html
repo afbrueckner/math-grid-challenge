@@ -288,7 +288,8 @@
       const startButton = grid.children[currentNumber - 1];
       startButton.classList.add('correct');
       startButton.disabled = true;
-      console.log(`Start: mode=${mode}, operation=${operation}, value=${value}, currentNumber=${currentNumber}, sequence=${factFamilySequence}`);
+      clicksInRound = 1; // Start counts as first "click"
+      console.log(`Start: mode=${mode}, operation=${operation}, value=${value}, currentNumber=${currentNumber}, sequence=${factFamilySequence}, clicksInRound=${clicksInRound}`);
     }
 
     function generateFactFamilySequence(n, op) {
@@ -331,8 +332,8 @@
     function getExpectedNumber() {
       if (mode === 'single') {
         return operation === 'add' ? currentNumber + value : currentNumber - value;
-      } else if (mode === 'fact-family' && clicksInRound < 4) {
-        return factFamilySequence[clicksInRound + 1];
+      } else if (mode === 'fact-family' && clicksInRound <= 4) { // Changed to <= 4 for 5 total clicks
+        return factFamilySequence[clicksInRound];
       }
       return null;
     }
@@ -359,7 +360,7 @@
         transitionMessage.textContent = `Great Job! Moving to next fact... (Passes: ${factFamilyPasses[factFamilyKey]})`;
         transitionMessage.style.display = 'block';
         console.log(`Transition Message Set: ${transitionMessage.textContent}, display=${transitionMessage.style.display}`);
-        alert(`DEBUG: Should see transition message now! Passes: ${factFamilyPasses[factFamilyKey]}`); // Fallback
+        alert(`DEBUG: Transition should appear! Passes: ${factFamilyPasses[factFamilyKey]}`);
         setTimeout(() => {
           console.log(`Hiding Transition: display=${transitionMessage.style.display}`);
           transitionMessage.style.display = 'none';
@@ -367,7 +368,7 @@
             awardBadge(getBadgeName());
           }
           moveToNextFact();
-        }, 1500); // Back to 1.5s
+        }, 1500);
       }
     }
 
