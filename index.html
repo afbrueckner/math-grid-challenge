@@ -62,7 +62,7 @@
       border-color: #8b0000;
     }
     .hint {
-      background-color: rgba(144, 238, 144, 0.3); /* Faint green */
+      background-color: rgba(144, 238, 144, 0.3);
     }
     #score, #total-score, #badges {
       margin-top: 15px;
@@ -114,7 +114,7 @@
       margin-right: 10px;
     }
     #hint-button {
-      background-color: #4682b4; /* Steel blue */
+      background-color: #4682b4;
     }
     #reset-button:hover {
       background-color: #ff6347;
@@ -147,20 +147,7 @@
     <option value="single">Single Number</option>
     <option value="fact-family">Fact Family</option>
   </select>
-  <select id="number-select">
-    <option value="1">1</option>
-    <option value="2">2</option>
-    <option value="3">3</option>
-    <option value="4">4</option>
-    <option value="5">5</option>
-    <option value="6">6</option>
-    <option value="7">7</option>
-    <option value="8">8</option>
-    <option value="9">9</option>
-    <option value="10">10</option>
-    <option value="11">11</option>
-    <option value="12">12</option>
-  </select>
+  <select id="number-select"></select>
   <select id="level-select">
     <option value="basic">Basic</option>
     <option value="advanced">Advanced</option>
@@ -206,9 +193,10 @@
       'Advanced Hard Facts': '⚡'
     };
     const easyFacts = [1, 2, 5, 10];
+    const hardFacts = [3, 4, 6, 7, 8, 9, 11, 12];
 
-    // Sound (using a simple beep URL - replace with a real sound if hosted)
-    const correctSound = new Audio('https://www.soundjay.com/buttons/beep-01a.mp3');
+    // Sound (chime sound - using a free online source)
+    const correctSound = new Audio('https://www.soundjay.com/buttons/chime-01a.mp3');
 
     // Controls
     const modeSelect = document.getElementById('mode-select');
@@ -216,11 +204,30 @@
     const levelSelect = document.getElementById('level-select');
     const resetButton = document.getElementById('reset-button');
     const hintButton = document.getElementById('hint-button');
+    modeSelect.addEventListener('change', updateNumberOptions);
+    levelSelect.addEventListener('change', updateNumberOptions);
     modeSelect.addEventListener('change', startChallenge);
     numberSelect.addEventListener('change', startChallenge);
     levelSelect.addEventListener('change', startChallenge);
     resetButton.addEventListener('click', resetGame);
     hintButton.addEventListener('click', showHint);
+
+    function updateNumberOptions() {
+      mode = modeSelect.value;
+      level = levelSelect.value;
+      numberSelect.innerHTML = '';
+      let options = mode === 'fact-family' && level === 'basic' ? easyFacts : 
+                    mode === 'fact-family' && level === 'advanced' ? hardFacts : 
+                    [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+      options.forEach(num => {
+        const option = document.createElement('option');
+        option.value = num;
+        option.textContent = num;
+        numberSelect.appendChild(option);
+      });
+      value = parseInt(numberSelect.value);
+      startChallenge();
+    }
 
     function startChallenge() {
       mode = modeSelect.value;
@@ -250,11 +257,10 @@
     }
 
     function getFactFamily(n) {
-      // Simple fact families based on sums up to 20-ish for middle school practice
       const families = {
-        1: [1, 2, 3], 2: [2, 3, 5], 3: [3, 4, 7], 4: [4, 5, 9],
-        5: [5, 6, 11], 6: [6, 7, 13], 7: [7, 8, 15], 8: [8, 9, 17],
-        9: [9, 10, 19], 10: [10, 11, 21], 11: [11, 12, 23], 12: [12, 13, 25]
+        1: [1, 2, 3], 2: [2, 3, 5], 5: [5, 6, 11], 10: [10, 11, 21],
+        3: [3, 4, 7], 4: [4, 5, 9], 6: [6, 7, 13], 7: [7, 8, 15],
+        8: [8, 9, 17], 9: [9, 10, 19], 11: [11, 12, 23], 12: [12, 13, 25]
       };
       return families[n];
     }
@@ -272,7 +278,7 @@
         document.getElementById('total-score').textContent = `Total Score: ${totalScore}`;
         currentNumber = expectedNumber;
         clicksInRound++;
-        correctSound.play().catch(() => {}); // Play sound, ignore errors if blocked
+        correctSound.play().catch(() => {}); // Play chime, ignore errors
         if (mode === 'fact-family') {
           factFamilyIndex = (factFamilyIndex + 1) % factFamily.length;
         }
@@ -303,7 +309,7 @@
             awardBadge(getBadgeName());
           }
           alert(`Challenge Complete! Passes: ${factFamilyPasses[factFamilyKey]}`);
-          startChallenge(); // Restart same challenge
+          startChallenge();
         }
       } else if (mode === 'fact-family' && clicksInRound >= 5) {
         let factFamilyKey = `${mode}-${value}-${level}`;
@@ -314,7 +320,7 @@
         }
         alert(`Round Complete! Passes: ${factFamilyPasses[factFamilyKey]}`);
         resetLevel();
-        startChallenge(); // Restart same fact family
+        startChallenge();
       }
     }
 
@@ -377,8 +383,8 @@
       startChallenge();
     }
 
-    // Start with default challenge
-    startChallenge();
+    // Initialize number options
+    updateNumberOptions();
   </script>
 </body>
 </html>
