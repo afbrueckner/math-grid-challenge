@@ -138,6 +138,7 @@
       color: #006400;
       display: none;
       z-index: 1000;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     }
     @keyframes pulse {
       0% { transform: scale(1); }
@@ -254,7 +255,7 @@
         numberSelect.appendChild(option);
       });
       value = parseInt(numberSelect.value);
-      currentFactIndex = 0; // Reset to start of fact family list
+      currentFactIndex = 0;
       startChallenge();
     }
 
@@ -279,7 +280,7 @@
         factFamilySequence = generateFactFamilySequence(value, operation);
         currentNumber = factFamilySequence[0];
         document.getElementById('challenge-info').textContent = 
-          `Challenge: ${operation === 'add' ? 'Add' : 'Subtract'} by ${value} (${factFamilySequence.join(', ')}, Start at ${currentNumber})`;
+          `Challenge: ${operation === 'add' ? 'Add' : 'Subtract'} by ${value} (Start at ${currentNumber})`;
       }
 
       const startButton = grid.children[currentNumber - 1];
@@ -352,16 +353,16 @@
         factFamilyPasses[factFamilyKey] = (factFamilyPasses[factFamilyKey] || 0) + 1;
         localStorage.setItem('factFamilyPasses', JSON.stringify(factFamilyPasses));
         
-        // Show transition message
         transitionMessage.textContent = `Great Job! Moving to next fact... (Passes: ${factFamilyPasses[factFamilyKey]})`;
         transitionMessage.style.display = 'block';
+        console.log(`Transition triggered: ${transitionMessage.textContent}`);
         setTimeout(() => {
           transitionMessage.style.display = 'none';
           if (factFamilyPasses[factFamilyKey] >= 3) {
             awardBadge(getBadgeName());
           }
           moveToNextFact();
-        }, 1500); // 1.5s delay
+        }, 1500);
       }
     }
 
