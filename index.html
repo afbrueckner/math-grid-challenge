@@ -3,13 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <title>Math Grid Challenge</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- For mobile scaling -->
   <style>
     body {
       font-family: Arial, sans-serif;
       text-align: center;
       background: linear-gradient(to bottom, #add8e6, #ffffff);
       margin: 0;
-      padding: 20px;
+      padding: 10px; /* Reduced padding for smaller screens */
     }
     h1 {
       color: #00008b;
@@ -21,7 +22,7 @@
       padding: 12px;
       border-radius: 8px;
       font-size: 22px;
-      margin-bottom: 25px;
+      margin-bottom: 15px; /* Reduced margin */
       border: 1px solid #ccc;
     }
     #grid {
@@ -30,6 +31,7 @@
       gap: 5px;
       margin: 0 auto;
       width: fit-content;
+      max-width: 100%; /* Prevent overflow on small screens */
     }
     button {
       width: 50px;
@@ -59,12 +61,15 @@
       border-color: #8b0000;
     }
     #score, #total-score, #badges {
-      margin-top: 25px;
+      margin-top: 15px; /* Reduced margin */
       font-size: 20px;
       padding: 10px;
       border-radius: 8px;
-      display: inline-block;
-      width: 300px;
+      display: block; /* Stack on mobile */
+      width: 80%; /* Responsive width */
+      max-width: 300px;
+      margin-left: auto;
+      margin-right: auto;
     }
     #score {
       color: #006400;
@@ -72,8 +77,8 @@
       border: 1px solid #006400;
     }
     #total-score {
-      color: #2f4f4f; /* Dark slate gray */
-      background-color: #e6f0fa; /* Light blue */
+      color: #2f4f4f;
+      background-color: #e6f0fa;
       border: 1px solid #2f4f4f;
     }
     #badges {
@@ -82,20 +87,21 @@
       border: 1px solid #800080;
     }
     #operation-select, #number-select, #level-select {
-      margin-bottom: 15px;
+      margin-bottom: 10px; /* Reduced margin */
       font-size: 18px;
       padding: 8px;
-      margin-right: 15px;
+      margin-right: 10px; /* Slightly reduced */
       border-radius: 5px;
       border: 1px solid #333;
       background-color: #fff;
       cursor: pointer;
+      width: 100px; /* Fixed width for consistency */
     }
     #reset-button {
-      margin-top: 20px;
+      margin-top: 15px; /* Reduced margin */
       font-size: 18px;
       padding: 10px 20px;
-      background-color: #ff4500; /* Orange-red */
+      background-color: #ff4500;
       color: #fff;
       border: none;
       border-radius: 5px;
@@ -103,10 +109,39 @@
       transition: background-color 0.2s;
     }
     #reset-button:hover {
-      background-color: #ff6347; /* Lighter red on hover */
+      background-color: #ff6347;
     }
     .badge-icon {
       margin-right: 5px;
+    }
+    /* Mobile optimizations */
+    @media (max-width: 600px) {
+      h1 {
+        font-size: 30px; /* Smaller title */
+      }
+      #challenge-info {
+        font-size: 18px; /* Smaller text */
+      }
+      #grid {
+        grid-template-columns: repeat(10, 35px); /* Smaller buttons on mobile */
+      }
+      button {
+        width: 35px;
+        height: 35px;
+        font-size: 14px; /* Smaller font */
+      }
+      #operation-select, #number-select, #level-select {
+        width: 90px; /* Slightly smaller */
+        font-size: 16px;
+      }
+      #score, #total-score, #badges {
+        font-size: 16px; /* Smaller text */
+        padding: 8px;
+      }
+      #reset-button {
+        font-size: 16px;
+        padding: 8px 16px;
+      }
     }
   </style>
 </head>
@@ -127,6 +162,8 @@
     <option value="8">8</option>
     <option value="9">9</option>
     <option value="10">10</option>
+    <option value="11">11</option>
+    <option value="12">12</option>
   </select>
   <select id="level-select">
     <option value="basic">Basic</option>
@@ -155,14 +192,17 @@
     let value = 2;
     let level = 'basic';
     let score = 0;
-    let totalScore = 0; // Persistent total score
+    let totalScore = 0;
     let badges = [];
 
-    // Badge icons
+    // Badge icons and definitions
     const badgeIcons = {
-      'Addition Ace': '🏆',
-      'Subtraction Star': '⭐'
+      'Basic Easy Facts': '🌟', // Star for 1, 2, 5, 10
+      'Basic Hard Facts': '🚀', // Rocket for 3, 4, 6, 7, 8, 9
+      'Advanced Easy Facts': '🎯', // Target for 1, 2, 5, 10
+      'Advanced Hard Facts': '⚡' // Lightning for 3, 4, 6, 7, 8, 9
     };
+    const easyFacts = [1, 2, 5, 10];
 
     // Dropdowns and reset button
     const operationSelect = document.getElementById('operation-select');
@@ -178,7 +218,7 @@
       operation = operationSelect.value;
       value = parseInt(numberSelect.value);
       level = levelSelect.value;
-      resetLevel(); // Reset only the current level, not total score or badges
+      resetLevel();
 
       if (level === 'basic') {
         if (operation === 'add') {
@@ -195,7 +235,6 @@
         }
       }
 
-      // Mark the starting number as green
       const startButton = grid.children[currentNumber - 1];
       startButton.classList.add('correct');
       startButton.disabled = true;
@@ -212,7 +251,7 @@
         button.classList.add('correct');
         button.disabled = true;
         score += 10;
-        totalScore += 10; // Add to total score
+        totalScore += 10;
         document.getElementById('score').textContent = `Score: ${score}`;
         document.getElementById('total-score').textContent = `Total Score: ${totalScore}`;
         currentNumber = expectedNumber;
@@ -234,7 +273,12 @@
     function checkCompletion() {
       const nextNumber = getExpectedNumber();
       if (nextNumber > 100 || nextNumber < 1) {
-        let badgeName = operation === 'add' ? 'Addition Ace' : 'Subtraction Star';
+        let badgeName = '';
+        if (level === 'basic') {
+          badgeName = easyFacts.includes(value) ? 'Basic Easy Facts' : 'Basic Hard Facts';
+        } else if (level === 'advanced') {
+          badgeName = easyFacts.includes(value) ? 'Advanced Easy Facts' : 'Advanced Hard Facts';
+        }
         awardBadge(badgeName);
         alert(`Challenge Complete! You earned the "${badgeName}" badge!`);
       }
@@ -259,7 +303,7 @@
     }
 
     function resetLevel() {
-      score = 0; // Reset current level score only
+      score = 0;
       document.getElementById('score').textContent = 'Score: 0';
       for (let button of grid.children) {
         button.classList.remove('correct');
@@ -269,7 +313,7 @@
 
     function resetGame() {
       score = 0;
-      totalScore = 0; // Reset total score too
+      totalScore = 0;
       badges = [];
       document.getElementById('score').textContent = 'Score: 0';
       document.getElementById('total-score').textContent = 'Total Score: 0';
@@ -278,7 +322,7 @@
         button.classList.remove('correct');
         button.disabled = false;
       }
-      startChallenge(); // Restart with current dropdown settings
+      startChallenge();
     }
 
     // Start with default challenge
