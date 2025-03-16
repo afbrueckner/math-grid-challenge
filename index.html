@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <title>Math Grid Challenge</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- For mobile scaling -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body {
       font-family: Arial, sans-serif;
       text-align: center;
       background: linear-gradient(to bottom, #add8e6, #ffffff);
       margin: 0;
-      padding: 10px; /* Reduced padding for smaller screens */
+      padding: 10px;
     }
     h1 {
       color: #00008b;
@@ -22,7 +22,7 @@
       padding: 12px;
       border-radius: 8px;
       font-size: 22px;
-      margin-bottom: 15px; /* Reduced margin */
+      margin-bottom: 15px;
       border: 1px solid #ccc;
     }
     #grid {
@@ -31,7 +31,7 @@
       gap: 5px;
       margin: 0 auto;
       width: fit-content;
-      max-width: 100%; /* Prevent overflow on small screens */
+      max-width: 100%;
     }
     button {
       width: 50px;
@@ -54,19 +54,23 @@
       background-color: #90ee90;
       color: #fff;
       border-color: #006400;
+      animation: pulse 0.3s;
     }
     .incorrect {
       background-color: #ff6347;
       color: #fff;
       border-color: #8b0000;
     }
+    .hint {
+      background-color: rgba(144, 238, 144, 0.3); /* Faint green */
+    }
     #score, #total-score, #badges {
-      margin-top: 15px; /* Reduced margin */
+      margin-top: 15px;
       font-size: 20px;
       padding: 10px;
       border-radius: 8px;
-      display: block; /* Stack on mobile */
-      width: 80%; /* Responsive width */
+      display: block;
+      width: 80%;
       max-width: 300px;
       margin-left: auto;
       margin-right: auto;
@@ -86,19 +90,19 @@
       background-color: #f0e6ff;
       border: 1px solid #800080;
     }
-    #operation-select, #number-select, #level-select {
-      margin-bottom: 10px; /* Reduced margin */
+    #mode-select, #number-select, #level-select {
+      margin-bottom: 10px;
       font-size: 18px;
       padding: 8px;
-      margin-right: 10px; /* Slightly reduced */
+      margin-right: 10px;
       border-radius: 5px;
       border: 1px solid #333;
       background-color: #fff;
       cursor: pointer;
-      width: 100px; /* Fixed width for consistency */
+      width: 100px;
     }
-    #reset-button {
-      margin-top: 15px; /* Reduced margin */
+    #reset-button, #hint-button {
+      margin-top: 15px;
       font-size: 18px;
       padding: 10px 20px;
       background-color: #ff4500;
@@ -107,49 +111,41 @@
       border-radius: 5px;
       cursor: pointer;
       transition: background-color 0.2s;
+      margin-right: 10px;
+    }
+    #hint-button {
+      background-color: #4682b4; /* Steel blue */
     }
     #reset-button:hover {
       background-color: #ff6347;
     }
+    #hint-button:hover {
+      background-color: #5a9bd4;
+    }
     .badge-icon {
       margin-right: 5px;
     }
-    /* Mobile optimizations */
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+      100% { transform: scale(1); }
+    }
     @media (max-width: 600px) {
-      h1 {
-        font-size: 30px; /* Smaller title */
-      }
-      #challenge-info {
-        font-size: 18px; /* Smaller text */
-      }
-      #grid {
-        grid-template-columns: repeat(10, 35px); /* Smaller buttons on mobile */
-      }
-      button {
-        width: 35px;
-        height: 35px;
-        font-size: 14px; /* Smaller font */
-      }
-      #operation-select, #number-select, #level-select {
-        width: 90px; /* Slightly smaller */
-        font-size: 16px;
-      }
-      #score, #total-score, #badges {
-        font-size: 16px; /* Smaller text */
-        padding: 8px;
-      }
-      #reset-button {
-        font-size: 16px;
-        padding: 8px 16px;
-      }
+      h1 { font-size: 30px; }
+      #challenge-info { font-size: 18px; }
+      #grid { grid-template-columns: repeat(10, 35px); }
+      button { width: 35px; height: 35px; font-size: 14px; }
+      #mode-select, #number-select, #level-select { width: 90px; font-size: 16px; }
+      #score, #total-score, #badges { font-size: 16px; padding: 8px; }
+      #reset-button, #hint-button { font-size: 16px; padding: 8px 16px; }
     }
   </style>
 </head>
 <body>
   <h1>Math Grid Challenge</h1>
-  <select id="operation-select">
-    <option value="add">Add</option>
-    <option value="subtract">Subtract</option>
+  <select id="mode-select">
+    <option value="single">Single Number</option>
+    <option value="fact-family">Fact Family</option>
   </select>
   <select id="number-select">
     <option value="1">1</option>
@@ -175,6 +171,7 @@
   <div id="total-score">Total Score: 0</div>
   <div id="badges">Badges: None</div>
   <button id="reset-button">Reset Game</button>
+  <button id="hint-button">Hint</button>
 
   <script>
     // Create the 10x10 grid
@@ -188,59 +185,78 @@
 
     // Game state
     let currentNumber = 2;
-    let operation = 'add';
+    let mode = 'single';
     let value = 2;
     let level = 'basic';
     let score = 0;
     let totalScore = 0;
     let badges = [];
+    let factFamily = [];
+    let factFamilyIndex = 0;
+    let clicksInRound = 0;
 
-    // Badge icons and definitions
+    // Load mastery data
+    let factFamilyPasses = JSON.parse(localStorage.getItem('factFamilyPasses')) || {};
+
+    // Badge definitions
     const badgeIcons = {
-      'Basic Easy Facts': '🌟', // Star for 1, 2, 5, 10
-      'Basic Hard Facts': '🚀', // Rocket for 3, 4, 6, 7, 8, 9
-      'Advanced Easy Facts': '🎯', // Target for 1, 2, 5, 10
-      'Advanced Hard Facts': '⚡' // Lightning for 3, 4, 6, 7, 8, 9
+      'Basic Easy Facts': '🌟',
+      'Basic Hard Facts': '🚀',
+      'Advanced Easy Facts': '🎯',
+      'Advanced Hard Facts': '⚡'
     };
     const easyFacts = [1, 2, 5, 10];
 
-    // Dropdowns and reset button
-    const operationSelect = document.getElementById('operation-select');
+    // Sound (using a simple beep URL - replace with a real sound if hosted)
+    const correctSound = new Audio('https://www.soundjay.com/buttons/beep-01a.mp3');
+
+    // Controls
+    const modeSelect = document.getElementById('mode-select');
     const numberSelect = document.getElementById('number-select');
     const levelSelect = document.getElementById('level-select');
     const resetButton = document.getElementById('reset-button');
-    operationSelect.addEventListener('change', startChallenge);
+    const hintButton = document.getElementById('hint-button');
+    modeSelect.addEventListener('change', startChallenge);
     numberSelect.addEventListener('change', startChallenge);
     levelSelect.addEventListener('change', startChallenge);
     resetButton.addEventListener('click', resetGame);
+    hintButton.addEventListener('click', showHint);
 
     function startChallenge() {
-      operation = operationSelect.value;
+      mode = modeSelect.value;
       value = parseInt(numberSelect.value);
       level = levelSelect.value;
       resetLevel();
 
-      if (level === 'basic') {
-        if (operation === 'add') {
+      if (mode === 'single') {
+        if (level === 'basic') {
           currentNumber = value;
-        } else if (operation === 'subtract') {
-          currentNumber = Math.floor(100 / value) * value;
-          if (currentNumber > 100) currentNumber = 100;
-        }
-      } else if (level === 'advanced') {
-        if (operation === 'add') {
+        } else {
           currentNumber = Math.floor(Math.random() * (100 - value * 5)) + 1;
-        } else if (operation === 'subtract') {
-          currentNumber = Math.floor(Math.random() * 50) + 51;
         }
+        document.getElementById('challenge-info').textContent = 
+          `Challenge: Add by ${value} (Start at ${currentNumber})`;
+      } else if (mode === 'fact-family') {
+        factFamily = getFactFamily(value);
+        factFamilyIndex = 0;
+        currentNumber = factFamily[0];
+        document.getElementById('challenge-info').textContent = 
+          `Challenge: Fact Family ${factFamily.join(', ')} (Start at ${currentNumber})`;
       }
 
       const startButton = grid.children[currentNumber - 1];
       startButton.classList.add('correct');
       startButton.disabled = true;
+    }
 
-      document.getElementById('challenge-info').textContent = 
-        `Challenge: ${operation === 'add' ? 'Add' : 'Subtract'} by ${value} (Start at ${currentNumber})`;
+    function getFactFamily(n) {
+      // Simple fact families based on sums up to 20-ish for middle school practice
+      const families = {
+        1: [1, 2, 3], 2: [2, 3, 5], 3: [3, 4, 7], 4: [4, 5, 9],
+        5: [5, 6, 11], 6: [6, 7, 13], 7: [7, 8, 15], 8: [8, 9, 17],
+        9: [9, 10, 19], 10: [10, 11, 21], 11: [11, 12, 23], 12: [12, 13, 25]
+      };
+      return families[n];
     }
 
     function checkAnswer(clickedNumber) {
@@ -255,32 +271,58 @@
         document.getElementById('score').textContent = `Score: ${score}`;
         document.getElementById('total-score').textContent = `Total Score: ${totalScore}`;
         currentNumber = expectedNumber;
+        clicksInRound++;
+        correctSound.play().catch(() => {}); // Play sound, ignore errors if blocked
+        if (mode === 'fact-family') {
+          factFamilyIndex = (factFamilyIndex + 1) % factFamily.length;
+        }
         checkCompletion();
       } else {
         button.classList.add('incorrect');
-        setTimeout(() => {
-          button.classList.remove('incorrect');
-        }, 500);
+        setTimeout(() => button.classList.remove('incorrect'), 500);
       }
     }
 
     function getExpectedNumber() {
-      if (operation === 'add') return currentNumber + value;
-      if (operation === 'subtract') return currentNumber - value;
+      if (mode === 'single') {
+        return currentNumber + value;
+      } else if (mode === 'fact-family') {
+        return factFamily[factFamilyIndex];
+      }
       return currentNumber;
     }
 
     function checkCompletion() {
-      const nextNumber = getExpectedNumber();
-      if (nextNumber > 100 || nextNumber < 1) {
-        let badgeName = '';
-        if (level === 'basic') {
-          badgeName = easyFacts.includes(value) ? 'Basic Easy Facts' : 'Basic Hard Facts';
-        } else if (level === 'advanced') {
-          badgeName = easyFacts.includes(value) ? 'Advanced Easy Facts' : 'Advanced Hard Facts';
+      if (mode === 'single') {
+        const nextNumber = getExpectedNumber();
+        if (nextNumber > 100) {
+          let factFamilyKey = `${mode}-${value}-${level}`;
+          factFamilyPasses[factFamilyKey] = (factFamilyPasses[factFamilyKey] || 0) + 1;
+          localStorage.setItem('factFamilyPasses', JSON.stringify(factFamilyPasses));
+          if (factFamilyPasses[factFamilyKey] >= 3) {
+            awardBadge(getBadgeName());
+          }
+          alert(`Challenge Complete! Passes: ${factFamilyPasses[factFamilyKey]}`);
+          startChallenge(); // Restart same challenge
         }
-        awardBadge(badgeName);
-        alert(`Challenge Complete! You earned the "${badgeName}" badge!`);
+      } else if (mode === 'fact-family' && clicksInRound >= 5) {
+        let factFamilyKey = `${mode}-${value}-${level}`;
+        factFamilyPasses[factFamilyKey] = (factFamilyPasses[factFamilyKey] || 0) + 1;
+        localStorage.setItem('factFamilyPasses', JSON.stringify(factFamilyPasses));
+        if (factFamilyPasses[factFamilyKey] >= 3) {
+          awardBadge(getBadgeName());
+        }
+        alert(`Round Complete! Passes: ${factFamilyPasses[factFamilyKey]}`);
+        resetLevel();
+        startChallenge(); // Restart same fact family
+      }
+    }
+
+    function getBadgeName() {
+      if (level === 'basic') {
+        return easyFacts.includes(value) ? 'Basic Easy Facts' : 'Basic Hard Facts';
+      } else {
+        return easyFacts.includes(value) ? 'Advanced Easy Facts' : 'Advanced Hard Facts';
       }
     }
 
@@ -302,8 +344,16 @@
       }
     }
 
+    function showHint() {
+      const expectedNumber = getExpectedNumber();
+      const button = grid.children[expectedNumber - 1];
+      button.classList.add('hint');
+      setTimeout(() => button.classList.remove('hint'), 1000);
+    }
+
     function resetLevel() {
       score = 0;
+      clicksInRound = 0;
       document.getElementById('score').textContent = 'Score: 0';
       for (let button of grid.children) {
         button.classList.remove('correct');
@@ -315,6 +365,8 @@
       score = 0;
       totalScore = 0;
       badges = [];
+      factFamilyPasses = {};
+      localStorage.setItem('factFamilyPasses', JSON.stringify(factFamilyPasses));
       document.getElementById('score').textContent = 'Score: 0';
       document.getElementById('total-score').textContent = 'Total Score: 0';
       updateBadgesDisplay();
