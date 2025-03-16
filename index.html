@@ -125,14 +125,25 @@
       resetGame();
 
       if (level === 'basic') {
-        currentNumber = value; // Start at the chosen number
+        if (operation === 'add') {
+          currentNumber = value; // Start at the chosen number
+        } else if (operation === 'subtract') {
+          // Start at highest multiple of value under or equal to 100
+          currentNumber = Math.floor(100 / value) * value;
+          if (currentNumber > 100) currentNumber = 100; // Cap at 100
+        }
       } else if (level === 'advanced') {
         if (operation === 'add') {
-          currentNumber = Math.floor(Math.random() * (100 - value * 5)) + 1; // Room for at least 5 steps
+          currentNumber = Math.floor(Math.random() * (100 - value * 5)) + 1; // Room for 5 steps
         } else if (operation === 'subtract') {
-          currentNumber = Math.floor(Math.random() * 50) + 51; // 51-100 to avoid negatives early
+          currentNumber = Math.floor(Math.random() * 50) + 51; // 51-100
         }
       }
+
+      // Mark the starting number as green
+      const startButton = grid.children[currentNumber - 1];
+      startButton.classList.add('correct');
+      startButton.disabled = true;
 
       document.getElementById('challenge-info').textContent = 
         `Challenge: ${operation === 'add' ? 'Add' : 'Subtract'} by ${value} (Start at ${currentNumber})`;
